@@ -1,0 +1,120 @@
+import os, sys
+import re
+
+# CONFIGURATION:
+# This is Python code, so it may be a bit confusing, but it's probable you 
+# only need to modify the first two or three lines.
+# Lines that begin with # are comments, so they don't count.
+# Don't use special characters here (ie. accents, anything not pure ASCII).
+
+# Where are your notes?
+# default is /home/username/notes ($HOME/notes)
+notes_directory = os.path.join(os.environ['HOME'], 'notes')
+
+# Or you can hardcode a path, for example, on Windows (don't forget to escape
+# your backslashes with a second one)
+# notes_directory = "C:\\notes"
+
+# Where to put daily generated revision HTML pages? They will be in
+# randomly-named subdirectories, e.g. /tmp/tmpUIayM6. One such directory is
+# created each time you call "python diffrevision.py today".
+# You're responsible for deleting them afterwards (it won't break anything if
+# you don't, but the temp directory will grow messy).
+tmp_directory = "/tmp"
+
+# Or on Windows, something like this:
+# tmp_directory = "C:\\Temp"
+
+# Where is to be stored the revision data? Don't store it in the 'notes'
+# directory.
+diffrevision_base_directory = os.path.join(os.environ['HOME'], '.diffrevision')
+
+# Or on Windows, something like this:
+# diffrevision_base_directory = "C:\\diffrevision"
+
+# USAGE STATISTICS (anonymous)
+# There's an "<img>" tag (image) loaded from fsavard.com that allows me to collect
+# usage statistics, in the templates/revision_list.html file. The goal is to know
+# how much people use this tool regularly. It's only an image, so
+# of course it's entirely anonymous, but if you don't like that just edit that
+# file (see the instructions at the bottom of that file, it's just a line to
+# remove).
+
+##############################################################################
+# NO NEED TO MODIFY from that point on, unless you have more advanced goals in
+# mind.
+
+recognized_extensions = ['.wiki','.txt']
+
+# enter filename patterns you never want to be considered for revision
+ignored_filename_patterns = [\
+        #r"Scratch.*",
+        #r"Temp.*"
+    ]
+
+# formatting to apply to notes
+# for the moment, only 'wikidpad' is supported
+# anything else results in no formatting at all for the moment
+# (use the value 'basic' if you don't want WikidPad formatting)
+wiki_syntax = 'basic'
+
+# codec used in encoding notes, for use by 'codecs' module
+# (codecs.open(..., codec_name))
+# See http://docs.python.org/release/2.4.4/lib/standard-encodings.html
+# for a list. For Windows, try 'cp1252' if you have no idea what this is.
+notes_codec = "utf-8"
+
+# TODO: codec for filenames
+
+##############
+# WikidPad-based notes only
+
+# WikidPad only: where is the root of the wiki?
+# 'files/' is then appended automatically to know where files
+#       (notably images) are to be found.
+# you must put a slash (/) at the end.
+wikidpad_files_base_dir = '/path/to/MyWiki/'
+
+##############
+# Scheduler, look in the scheduling/ directory
+
+import scheduling.fixed_scheduler
+# fixed scheduler makes next review depend only on number of reviews to now
+# here we specify intervals for first review, second review, etc.
+intervals = [2,6,14,30,45,90,120,180,360,720,99999]
+# Add or subtract this from intervals above when rescheduling
+# (random, uniform). Each value corresponds to a value in 'intervals'
+random_plusminus = [1,2,3,5,7,10,15,30,60,90,0]
+assert len(intervals) == len(random_plusminus)
+default_scheduler = scheduling.fixed_scheduler.FixedScheduler(\
+                          intervals=intervals, random_plusminus=random_plusminus)
+
+# scheduler for filepaths you feel are more important not to forget
+# (shorter intervals)
+important_filename_patterns = [\
+        r"(^|^.*\/)Important .*",
+    ]
+important_filename_patterns = [re.compile(p) for p in important_filename_patterns]
+important_intervals = [1,4,10,20,30,50,75,90,120]
+important_random_plusminus = [0,0,0,0,0,0,0,0,0]
+assert len(important_intervals) == len(important_random_plusminus)
+important_scheduler = scheduling.fixed_scheduler.FixedScheduler(\
+                          intervals=important_intervals, random_plusminus=important_random_plusminus)
+
+def get_scheduler(title, verbose=True):
+    for p in important_filename_patterns:
+        if p.match(title):
+            if verbose:
+                print "Using 'important_scheduler' for", title
+            return important_scheduler
+    else:
+        return default_scheduler
+
+###################
+# Post-processing
+
+if not os.path.exists(diffrevision_base_directory):
+    os.mkdir(diffrevision_base_directory)
+
+ignored_filename_patterns = [re.compile(p) for p in ignored_filename_patterns]
+
