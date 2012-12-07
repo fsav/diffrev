@@ -2,12 +2,13 @@ import os, sys
 import re
 
 # CONFIGURATION:
+# Make the changes you need here and rename the file to "configuration.py".
 # This is Python code, so it may be a bit confusing, but it's probable you 
 # only need to modify the first two or three lines.
 # Lines that begin with # are comments, so they don't count.
 # Don't use special characters here (ie. accents, anything not pure ASCII).
 
-# Where are your notes?
+# Where are your text notes?
 # default is /home/username/notes ($HOME/notes)
 notes_directory = os.path.join(os.environ['HOME'], 'notes')
 
