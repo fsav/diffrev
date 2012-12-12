@@ -4,7 +4,7 @@ import re
 # CONFIGURATION:
 # Make the changes you need here and rename the file to "configuration.py".
 # This is Python code, so it may be a bit confusing, but it's probable you 
-# only need to modify the first two or three lines.
+# only need to modify the first few parameters.
 # Lines that begin with # are comments, so they don't count.
 # Don't use special characters here (ie. accents, anything not pure ASCII).
 
@@ -33,7 +33,14 @@ diffrevision_base_directory = os.path.join(os.environ['HOME'], '.diffrevision')
 # Or on Windows, something like this:
 # diffrevision_base_directory = "C:\\diffrevision"
 
-# USAGE STATISTICS (anonymous)
+# Character encoding of your notes
+# See http://docs.python.org/release/2.4.4/lib/standard-encodings.html
+# for a list (take values from the "Codec" column).
+# For Windows, try 'cp1252' if you have no idea what this is.
+notes_codec = "utf-8"
+
+
+# Usage counter
 # There's an "<img>" tag (image) loaded from fsavard.com that allows me to collect
 # usage statistics, in the templates/revision_list.html file. The goal is to know
 # how much people use this tool regularly. It's only an image, so
@@ -58,12 +65,6 @@ ignored_filename_patterns = [\
 # anything else results in no formatting at all for the moment
 # (use the value 'basic' if you don't want WikidPad formatting)
 wiki_syntax = 'basic'
-
-# codec used in encoding notes, for use by 'codecs' module
-# (codecs.open(..., codec_name))
-# See http://docs.python.org/release/2.4.4/lib/standard-encodings.html
-# for a list. For Windows, try 'cp1252' if you have no idea what this is.
-notes_codec = "utf-8"
 
 # TODO: codec for filenames
 
