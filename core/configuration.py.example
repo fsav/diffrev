@@ -54,6 +54,10 @@ notes_codec = "utf-8"
 
 recognized_extensions = ['.wiki','.txt']
 
+# experimental: using this server allows operations that write to DB directly
+# from the review HTML pages, so you can "hide" reviews, for example
+use_local_server = False
+
 # enter filename patterns you never want to be considered for revision
 ignored_filename_patterns = [\
         #r"Scratch.*",

@@ -29,6 +29,7 @@ from note_listing import get_new_document_paths
 
 from generation.static_html_generator import StaticHtmlGenerator
 from diffing.diff_runner import DiffRunner
+from server import localserver
 
 def add_to_ignore_list(arguments, config):
     if arguments:
@@ -115,6 +116,13 @@ def generate_for_today(arguments, config):
     print "When you're done, you must manually call " 
     print "    'diffrevision.py finished [list of revision numbers]'"
     print "and delete the temporary directory."
+
+    if getattr(storage.config, 'use_local_server', False):
+        print "STARTING LOCAL SERVER on port", localserver.SERVER_PORT
+        localserver.LocalReviewServer.set_global_storage(storage)
+        server = localserver.HTTPServer(('localhost', localserver.SERVER_PORT), localserver.LocalReviewServer)
+        print 'Use <Ctrl-C> to stop'
+        server.serve_forever()
 
 def perform_diff(config, scheduler_getter):
     diffrunner = DiffRunner(config, scheduler_getter=config.get_scheduler)

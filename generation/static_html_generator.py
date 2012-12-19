@@ -36,6 +36,8 @@ import tempfile
 
 import diffing.plaintext_line_diff
 
+from server import localserver
+
 REVISION_CONTENT_TEMPLATE_FILE = "revision_content.html"
 REVISION_LIST_TEMPLATE_FILE = "revision_list.html"
 
@@ -53,7 +55,7 @@ def load_template(template_rel_path):
     f.close()
     return c
 
-def apply_revision_content_template(title, revision_content):
+def apply_revision_content_template(title, revision_content, server_based_code=""):
     global REVISION_CONTENT_TEMPLATE
     if REVISION_CONTENT_TEMPLATE is None:
         REVISION_CONTENT_TEMPLATE = \
@@ -129,6 +131,9 @@ class StaticHtmlGenerator(object):
         id_list = []
 
         for rev_obj in revision_objects:
+            if rev_obj.hidden:
+                continue
+
             lines = rev_obj.content.splitlines()
             spans_per_line = [[] for l in lines]
 
@@ -149,7 +154,14 @@ class StaticHtmlGenerator(object):
             
             html = self.formatter.format(rev_obj)
 
-            html = apply_revision_content_template(title, html)
+            server_based_code = ''
+            if getattr(self.config, 'use_local_server', False):
+                server_based_code = """
+                        <!--<script type="text/javascript" src="/js/jQuery.min.js"></script>-->
+                        <a href="http://localhost:%s/hidereview/?reviewid=%s" target="_blank">Don't show this review again</a>
+                        """ % (localserver.SERVER_PORT, rev_obj.id)
+
+            html = apply_revision_content_template(title, html, server_based_code)
 
             # TODO: error handling
             f = codecs.open(os.path.join(output_dir, link), "w", "utf-8")

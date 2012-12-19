@@ -39,9 +39,10 @@ CREATE_TABLE_STATEMENT = "create table "+REVISIONS_TABLE_NAME+"("+\
                             "document_relative_path varchar(256),"+\
                             "datetime_diffed_on timestamp,"+\
                             "scheduled_date date,"+\
-                            "num_revisions_done integer)"
+                            "num_revisions_done integer,"+\
+                            "hidden integer not null default 0)"
 ALL_COL_NAMES = "id, document_relative_path, datetime_diffed_on,"+\
-                    " scheduled_date, num_revisions_done"
+                    " scheduled_date, num_revisions_done, hidden"
 
 def get_formatted_date(date):
     as_datetime = datetime.datetime(year=date.year,
@@ -165,6 +166,7 @@ class Revision(object):
         self.datetime_diffed_on = None
         self.scheduled_date = None
         self.num_revisions_done = None
+        self.hidden = None
 
         self.content = None
         self.changelist = None
@@ -176,6 +178,7 @@ class Revision(object):
             "datetime_diffed_on=%s, "+\
             "scheduled_date=%s, "+\
             "num_revisions_done=%s, "+\
+            "hidden=%s, "+\
             "content len=%s, "+\
             "changelist len=%s}") % (\
                     self.id,
@@ -183,6 +186,7 @@ class Revision(object):
                     self.datetime_diffed_on,
                     self.scheduled_date,
                     self.num_revisions_done,
+                    self.hidden,
                     None if self.content is None else len(self.content),
                     None if self.changelist is None else len(self.changelist))
 
@@ -224,6 +228,18 @@ class Revision(object):
 
         self.storage.db_connection.commit()
 
+    def set_hidden_state(self, hidden=True):
+        assert self.storage is not None
+        assert self.id is not None
+
+        hidden_value = (1 if hidden else 0)
+
+        self.storage.db_cursor.execute(\
+                'UPDATE '+REVISIONS_TABLE_NAME+' SET hidden=? WHERE id=?',
+                    (hidden_value,self.id))
+
+        self.storage.db_connection.commit()
+
     @staticmethod
     def create_from_record(storage, record, load_diff_content=True):
         r = Revision(storage)
@@ -233,6 +249,7 @@ class Revision(object):
         r.datetime_diffed_on = record[2]
         r.scheduled_date = record[3]
         r.num_revisions_done = record[4]
+        r.hidden = (record[5] != 0)
 
         if load_diff_content:
             r.load_diff_content()
