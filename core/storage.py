@@ -192,11 +192,14 @@ class Revision(object):
 
     def perform_insert(self, no_content=False):
         self.storage.db_cursor.execute(\
-            'INSERT INTO '+REVISIONS_TABLE_NAME+' VALUES (null, ?, ?, ?, ?)',
+            'INSERT INTO '+REVISIONS_TABLE_NAME\
+                 +' (' + ALL_COL_NAMES + ') '\
+                 +'VALUES (null, ?, ?, ?, ?, ?)', # null is for ID
                     (self.document_relative_path,\
                      self.datetime_diffed_on,\
                      self.scheduled_date,\
-                     self.num_revisions_done))
+                     self.num_revisions_done,\
+                     False)) # hidden = False, at first
 
         # set id from autoassigned value
         # rowid is the same as primary key for sqlite
