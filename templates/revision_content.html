@@ -1,18 +1,83 @@
 <html>
 <head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/> 
 <style type='text/css'>
 BODY {
     font-family: Arial, Helvetica, sans-serif;
 }
 .hl {
-    background-color: yellow;
+    background-color: #FFBB00;
     white-space: pre-wrap;
+}
+.activehl {
+    background-color: yellow;
 }
 .revision_content {
     white-space: pre-wrap;
 }
 </style>
+<script type='text/javascript'>
+<!--
+var SCROLL_OFFSET = 200; // px
+
+function scrollToActive() {
+    var activeSpan = $('.activehl');
+
+    var scrollPos = $(activeSpan[0]).offset().top;
+    if (scrollPos >= SCROLL_OFFSET) {
+        scrollPos -= SCROLL_OFFSET;
+        $('html, body').animate({ scrollTop: scrollPos }, 200);
+    }else{
+        $('html, body').animate({ scrollTop: 0 }, 200);
+    }
+}
+
+function highlightNext(direction) {
+    var allHls = $('span.hl');
+
+    if(allHls.length > 0 && allHls.filter('.activehl').length == 0)
+    {
+        $(allHls[0]).addClass('activehl');
+    }else if (allHls.length > 0){
+        var currentIndex=-1;
+        for (var i=0; i<allHls.length; i++)
+        {
+            if($(allHls[i]).hasClass('activehl')){
+                currentIndex = i;
+                break;
+            }
+        }
+        if (currentIndex > -1){
+            var nextIndex = currentIndex + direction;
+
+            if (0 <= nextIndex && nextIndex < allHls.length)
+            {
+                $(allHls[currentIndex]).removeClass('activehl');
+                $(allHls[nextIndex]).addClass('activehl');
+            }
+        }
+    }
+
+    scrollToActive();
+}
+
+if(!('deleteEntry' in window)) {
+    // will be overridden if entry deletion is on
+    window.deleteEntry = function(){}
+}
+
+$(document).keypress(function(event){
+	if(event.which == "j".charCodeAt(0) || event.which == "s".charCodeAt(0)) {
+        highlightNext(1);
+	}else if(event.which == "k".charCodeAt(0) || event.which == "w".charCodeAt(0)){
+        highlightNext(-1);
+    }else if(event.which == 8){ // backspace
+        deleteEntry();
+    }
+});
+//-->
+</script>
 </head>
 <body>
 <h1>%(title)s</h1>

@@ -159,7 +159,14 @@ class StaticHtmlGenerator(object):
                 server_based_code = """
                         <!--<script type="text/javascript" src="/js/jQuery.min.js"></script>-->
                         <a href="http://localhost:%s/hidereview/?reviewid=%s">Don't show this review again</a>
-                        """ % (localserver.SERVER_PORT, rev_obj.id)
+                        <script type="text/javascript">
+
+                        window.deleteEntry = function() {
+                                document.location.href = 'http://localhost:%s/hidereview/?reviewid=%s';
+                        }
+
+                        </script>
+                        """ % (localserver.SERVER_PORT, rev_obj.id, localserver.SERVER_PORT, rev_obj.id)
 
             html = apply_revision_content_template(title, html, server_based_code)
 
