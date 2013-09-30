@@ -130,6 +130,10 @@ class StaticHtmlGenerator(object):
         li_list = []
         id_list = []
 
+        total_count = len([x for x in revision_objects if not x.hidden])
+
+        print "Total revisions:", total_count
+
         for rev_obj in revision_objects:
             if rev_obj.hidden:
                 continue
@@ -184,6 +188,7 @@ class StaticHtmlGenerator(object):
         f.close()
 
         print "Finished generation. Index at", index_path
+        print "Total revisions:", total_count
         
         return output_dir
 

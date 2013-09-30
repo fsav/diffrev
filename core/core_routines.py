@@ -129,6 +129,12 @@ def perform_diff(config, scheduler_getter):
 
     diffrunner.scan_files_for_changes()
 
+def log_number_revisions(config, number):
+    logfile = os.path.join(config.diffrevision_base_directory, "revision_log.txt")
+    f = open(logfile, "a")
+    print >>f, str(datetime.datetime.now())+"\t"+str(number)
+    f.close()
+
 def reviews_finished(arguments, config):
     storage = Storage(config)
     
@@ -149,6 +155,9 @@ def reviews_finished(arguments, config):
         print "Revision for", rev_obj.document_relative_path, \
             "(", get_formatted_datetime(rev_obj.datetime_diffed_on), ")",\
             "scheduled for ", get_formatted_date(new_date)
+   
+    # also logging revisions that were "deleted" during the revision session
+    log_number_revisions(config, len(arguments))
 
 def list_all(config):
     storage = Storage(config)
